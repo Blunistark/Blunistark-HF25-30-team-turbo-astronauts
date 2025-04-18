@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <style>
     #map { height: 100vh; width: 100%; }
     #debug { position: fixed; top: 10px; left: 10px; background: white; padding: 10px; z-index: 1000; max-height: 80vh; overflow-y: auto; }
@@ -21,6 +22,15 @@
       const debugDiv = document.getElementById('debug');
       debugDiv.innerHTML += msg + '<br>';
       console.log(msg);
+    }
+
+    // Function to process Excel data
+    function processExcelData(data, filename) {
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+      debug(`Processed ${filename}: ${jsonData.length} rows`);
+      return jsonData;
     }
 
     // Wait for the page to fully load
@@ -46,6 +56,91 @@
         // Create a layer group for all markers
         const allMarkersLayer = L.layerGroup().addTo(map);
         debug('Marker layer group created');
+
+        // Load dataset files
+        fetch('dataset/large/Map_Data_Large_with_Geofencing.xlsx')
+          .then(response => response.arrayBuffer())
+          .then(data => {
+            const mapData = processExcelData(data, 'Map Data');
+            debug('Map data loaded successfully');
+            
+            // Process geofencing data
+            mapData.forEach(zone => {
+              if (zone.latitude && zone.longitude && zone.radius) {
+                const circle = L.circle([zone.latitude, zone.longitude], {
+                  color: 'red',
+                  fillColor: '#f03',
+                  fillOpacity: 0.1,
+                  radius: zone.radius * 1000 // Convert km to meters
+                }).addTo(allMarkersLayer);
+                
+                circle.bindPopup(`Geofence: ${zone.name || 'Unnamed Zone'}<br>Radius: ${zone.radius}km`);
+              }
+            });
+          })
+          .catch(error => {
+            debug('Error loading map data: ' + error.message);
+          });
+
+        fetch('dataset/large/Delivery_Drones_Large_Dataset.xlsx')
+          .then(response => response.arrayBuffer())
+          .then(data => {
+            const deliveryData = processExcelData(data, 'Delivery Drones');
+            debug('Delivery drones data loaded successfully');
+            
+            // Process delivery drones
+            deliveryData.forEach(drone => {
+              if (drone.latitude && drone.longitude) {
+                const marker = L.marker([drone.latitude, drone.longitude], {
+                  icon: L.divIcon({
+                    className: 'drone-icon',
+                    html: '📦',
+                    iconSize: [20, 20]
+                  })
+                }).addTo(allMarkersLayer);
+                
+                marker.bindPopup(`
+                  Delivery Drone ID: ${drone.drone_id || 'Unknown'}<br>
+                  Status: ${drone.status || 'Unknown'}<br>
+                  Altitude: ${drone.altitude || 'Unknown'}m<br>
+                  Speed: ${drone.speed || 'Unknown'}km/h
+                `);
+              }
+            });
+          })
+          .catch(error => {
+            debug('Error loading delivery drones data: ' + error.message);
+          });
+
+        fetch('dataset/large/Surveillance_Drones_Large_Dataset.xlsx')
+          .then(response => response.arrayBuffer())
+          .then(data => {
+            const surveillanceData = processExcelData(data, 'Surveillance Drones');
+            debug('Surveillance drones data loaded successfully');
+            
+            // Process surveillance drones
+            surveillanceData.forEach(drone => {
+              if (drone.latitude && drone.longitude) {
+                const marker = L.marker([drone.latitude, drone.longitude], {
+                  icon: L.divIcon({
+                    className: 'drone-icon',
+                    html: '📹',
+                    iconSize: [20, 20]
+                  })
+                }).addTo(allMarkersLayer);
+                
+                marker.bindPopup(`
+                  Surveillance Drone ID: ${drone.drone_id || 'Unknown'}<br>
+                  Status: ${drone.status || 'Unknown'}<br>
+                  Altitude: ${drone.altitude || 'Unknown'}m<br>
+                  Coverage Area: ${drone.coverage_area || 'Unknown'}km²
+                `);
+              }
+            });
+          })
+          .catch(error => {
+            debug('Error loading surveillance drones data: ' + error.message);
+          });
 
         // Bases
         const bases = [
@@ -169,11 +264,19 @@
         map.fitBounds(bounds, { padding: [50, 50] });
         debug('Map bounds adjusted to show all markers');
 
-        // Add a test marker to verify the map is working
-        const testMarker = L.marker([13.0827, 77.5877], {
-          title: 'Test Marker'
-        }).addTo(map);
-        debug('Test marker added at MG Road');
+        // Add legend
+        const legend = L.control({position: 'bottomright'});
+        legend.onAdd = function(map) {
+          const div = L.DomUtil.create('div', 'info legend');
+          div.innerHTML = `
+            <h4>Drone Types</h4>
+            <div><span style="font-size: 20px;">📦</span> Delivery Drone</div>
+            <div><span style="font-size: 20px;">📹</span> Surveillance Drone</div>
+            <div><span style="color: red;">●</span> Geofence Zone</div>
+          `;
+          return div;
+        };
+        legend.addTo(map);
 
       } catch (error) {
         debug('Error: ' + error.message);
