@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UATM Drone Map Simulation</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([13.03, 77.6], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Bases
+    const bases = [
+      ["Base Alpha", 13.03, 77.58],
+      ["Base Beta", 13.06, 77.61],
+      ["Base Gamma", 12.99, 77.62],
+      ["Base Delta", 13.01, 77.59],
+      ["Base Epsilon", 13.07, 77.63]
+    ];
+    bases.forEach(([name, lat, lon]) => {
+      L.marker([lat, lon], { title: name })
+        .addTo(map)
+        .bindPopup(`<b>${name}</b><br>Base Location`);
+    });
+
+    // Charging Ports
+    const ports = [
+      ["Port A", 13.04, 77.59],
+      ["Port B", 13.05, 77.6],
+      ["Port C", 13.02, 77.61],
+      ["Port D", 13.01, 77.62],
+      ["Port E", 13.015, 77.595],
+      ["Port F", 13.035, 77.605],
+      ["Port G", 13.025, 77.615]
+    ];
+    ports.forEach(([name, lat, lon]) => {
+      L.circleMarker([lat, lon], { radius: 6, color: 'green' })
+        .addTo(map)
+        .bindPopup(`<b>${name}</b><br>Charging Port`);
+    });
+
+    // Restricted Zones
+    const zones = [
+      { name: "Airport Zone", sw: [13.197, 77.706], ne: [13.205, 77.718] },
+      { name: "Military Area", sw: [12.970, 77.590], ne: [12.975, 77.600] },
+      { name: "Vidhana Soudha Perimeter", sw: [12.979, 77.591], ne: [12.984, 77.596] },
+      { name: "Tech Park Zone", sw: [13.042, 77.615], ne: [13.048, 77.625] },
+      { name: "Railway Zone", sw: [12.960, 77.575], ne: [12.970, 77.585] }
+    ];
+    zones.forEach(({ name, sw, ne }) => {
+      L.rectangle([sw, ne], {
+        color: "red",
+        weight: 2,
+        fillOpacity: 0.3
+      }).addTo(map).bindPopup(`<b>${name}</b><br>Restricted Zone`);
+    });
+
+    // Drones (mock sample - add more from dataset if needed)
+    const drones = [
+      { id: "SRV_013", type: "Surveillance", lat: 13.4957, lon: 78.2814, state: "In home", battery: 93.5, zone: "North Bangalore" },
+      { id: "SRV_011", type: "Surveillance", lat: 12.9434, lon: 78.2724, state: "In home", battery: 73.0, zone: "East Bangalore" },
+      { id: "DRN_006", type: "Delivery", lat: 13.2669, lon: 77.9294, state: "In house", battery: 46.4, zone: "East Bangalore" },
+      { id: "DRN_002", type: "Delivery", lat: 13.199, lon: 78.1063, state: "In house", battery: 53.5, zone: "Central Bangalore" },
+      { id: "DRN_010", type: "Delivery", lat: 13.3413, lon: 78.1099, state: "Going home", battery: 83.9, zone: "Central Bangalore" }
+    ];
+
+    drones.forEach(drone => {
+      const color = drone.type === "Surveillance" ? "purple" : "blue";
+      L.circleMarker([drone.lat, drone.lon], {
+        radius: 6,
+        color: color,
+        fillOpacity: 0.9
+      }).addTo(map).bindPopup(`
+        <b>${drone.id}</b><br>
+        Type: ${drone.type}<br>
+        State: ${drone.state}<br>
+        Battery: ${drone.battery}%<br>
+        Zone: ${drone.zone}
+      `);
+    });
+  </script>
+</body>
+</html>
+
