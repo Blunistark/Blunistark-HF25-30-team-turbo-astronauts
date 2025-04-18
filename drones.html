@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     #map { height: 100vh; width: 100%; }
-    #debug { position: fixed; top: 10px; left: 10px; background: white; padding: 10px; z-index: 1000; }
+    #debug { position: fixed; top: 10px; left: 10px; background: white; padding: 10px; z-index: 1000; max-height: 80vh; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -23,121 +23,150 @@
       console.log(msg);
     }
 
-    try {
-      // Initialize map with a wider view to ensure we can see all drones
-      const map = L.map('map').setView([13.2, 77.8], 10);
-      debug('Map initialized');
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-      debug('Tile layer added');
-
-      // Create a layer group for all markers
-      const allMarkersLayer = L.layerGroup().addTo(map);
-      
-      // Bases
-      const bases = [
-        ["Base Alpha", 13.03, 77.58],
-        ["Base Beta", 13.06, 77.61],
-        ["Base Gamma", 12.99, 77.62],
-        ["Base Delta", 13.01, 77.59],
-        ["Base Epsilon", 13.07, 77.63]
-      ];
-      bases.forEach(([name, lat, lon]) => {
-        L.marker([lat, lon], { title: name })
-          .addTo(allMarkersLayer)
-          .bindPopup(`<b>${name}</b><br>Base Location`);
-      });
-      debug('Bases added');
-
-      // Charging Ports
-      const ports = [
-        ["Port A", 13.0827, 77.5877],  // Central Bangalore (MG Road area)
-        ["Port B", 13.0232, 77.5478],  // South Bangalore (JP Nagar)
-        ["Port C", 13.1132, 77.5699],  // North Bangalore (Hebbal)
-        ["Port D", 12.9716, 77.5946],  // South-East Bangalore (HSR Layout)
-        ["Port E", 13.0072, 77.5513],  // South-West Bangalore (Banashankari)
-        ["Port F", 13.1489, 77.6177],  // North-East Bangalore (Whitefield)
-        ["Port G", 12.9349, 77.6050],  // South-East Bangalore (Electronic City)
-        ["Port H", 13.0604, 77.6271],  // East Bangalore (Marathahalli)
-        ["Port I", 13.0089, 77.4875],  // West Bangalore (Mysore Road)
-        ["Port J", 13.0847, 77.6347]   // North-East Bangalore (KR Puram)
-      ];
-      ports.forEach(([name, lat, lon]) => {
-        L.circleMarker([lat, lon], { 
-          radius: 8,
-          color: 'green',
-          fillColor: 'green',
-          fillOpacity: 0.9,
-          weight: 2
-        })
-          .addTo(allMarkersLayer)
-          .bindPopup(`<b>${name}</b><br>Charging Port`);
-      });
-      debug('Charging ports added');
-
-      // Restricted Zones
-      const zones = [
-        { name: "Airport Zone", sw: [13.197, 77.706], ne: [13.205, 77.718] },
-        { name: "Military Area", sw: [12.970, 77.590], ne: [12.975, 77.600] },
-        { name: "Vidhana Soudha Perimeter", sw: [12.979, 77.591], ne: [12.984, 77.596] },
-        { name: "Tech Park Zone", sw: [13.042, 77.615], ne: [13.048, 77.625] },
-        { name: "Railway Zone", sw: [12.960, 77.575], ne: [12.970, 77.585] }
-      ];
-      zones.forEach(({ name, sw, ne }) => {
-        L.rectangle([sw, ne], {
-          color: "red",
-          weight: 2,
-          fillOpacity: 0.3
-        }).addTo(map).bindPopup(`<b>${name}</b><br>Restricted Zone`);
-      });
-      debug('Restricted zones added');
-
-      // Drones (mock sample - add more from dataset if needed)
-      const drones = [
-        { id: "SRV_013", type: "Surveillance", lat: 13.0827, lon: 77.5877, state: "Patrolling", battery: 93.5, zone: "Central Bangalore" },  // MG Road area
-        { id: "SRV_011", type: "Surveillance", lat: 13.0232, lon: 77.5478, state: "Patrolling", battery: 73.0, zone: "South Bangalore" },  // JP Nagar
-        { id: "DRN_006", type: "Delivery", lat: 13.1132, lon: 77.5699, state: "In transit", battery: 46.4, zone: "North Bangalore" },      // Hebbal
-        { id: "DRN_002", type: "Delivery", lat: 12.9716, lon: 77.5946, state: "In transit", battery: 53.5, zone: "South-East Bangalore" }, // HSR Layout
-        { id: "DRN_010", type: "Delivery", lat: 13.0072, lon: 77.5513, state: "In transit", battery: 83.9, zone: "South-West Bangalore" }, // Banashankari
-        { id: "SRV_014", type: "Surveillance", lat: 13.1489, lon: 77.6177, state: "Patrolling", battery: 67.2, zone: "North-East Bangalore" }, // Whitefield
-        { id: "DRN_007", type: "Delivery", lat: 12.9349, lon: 77.6050, state: "In transit", battery: 78.5, zone: "South-East Bangalore" },    // Electronic City
-        { id: "SRV_015", type: "Surveillance", lat: 13.0604, lon: 77.6271, state: "Patrolling", battery: 82.1, zone: "East Bangalore" },      // Marathahalli
-        { id: "DRN_008", type: "Delivery", lat: 13.0089, lon: 77.4875, state: "In transit", battery: 45.8, zone: "West Bangalore" },          // Mysore Road
-        { id: "SRV_016", type: "Surveillance", lat: 13.0847, lon: 77.6347, state: "Patrolling", battery: 88.3, zone: "North-East Bangalore" }  // KR Puram
-      ];
-      
-      drones.forEach(drone => {
-        const color = drone.type === "Surveillance" ? "purple" : "blue";
-        const marker = L.circleMarker([drone.lat, drone.lon], {
-          radius: 8,
-          color: color,
-          fillColor: color,
-          fillOpacity: 0.9,
-          weight: 2
-        }).addTo(allMarkersLayer);
+    // Wait for the page to fully load
+    window.onload = function() {
+      try {
+        debug('Page loaded, initializing map...');
         
-        marker.bindPopup(`
-          <b>${drone.id}</b><br>
-          Type: ${drone.type}<br>
-          State: ${drone.state}<br>
-          Battery: ${drone.battery}%<br>
-          Zone: ${drone.zone}
-        `);
+        // Check if Leaflet is loaded
+        if (typeof L === 'undefined') {
+          throw new Error('Leaflet library not loaded!');
+        }
+        debug('Leaflet library loaded successfully');
+
+        // Initialize map with a wider view to ensure we can see all drones
+        const map = L.map('map').setView([13.2, 77.8], 10);
+        debug('Map initialized');
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        debug('Tile layer added');
+
+        // Create a layer group for all markers
+        const allMarkersLayer = L.layerGroup().addTo(map);
+        debug('Marker layer group created');
+
+        // Bases
+        const bases = [
+          ["Base Alpha", 13.03, 77.58],
+          ["Base Beta", 13.06, 77.61],
+          ["Base Gamma", 12.99, 77.62],
+          ["Base Delta", 13.01, 77.59],
+          ["Base Epsilon", 13.07, 77.63]
+        ];
+        bases.forEach(([name, lat, lon]) => {
+          L.marker([lat, lon], { title: name })
+            .addTo(allMarkersLayer)
+            .bindPopup(`<b>${name}</b><br>Base Location`);
+        });
+        debug('Bases added');
+
+        // Charging Ports - Key locations in Bangalore (adjusted to avoid drone overlap)
+        const ports = [
+          ["Port A", 13.0927, 77.5977],  // Ulsoor (North of MG Road)
+          ["Port B", 13.0332, 77.5378],  // Basavanagudi (South of JP Nagar)
+          ["Port C", 13.1232, 77.5599],  // Sahakar Nagar (North of Hebbal)
+          ["Port D", 12.9616, 77.5846],  // Bommanahalli (South of HSR)
+          ["Port E", 13.0272, 77.5313],  // Padmanabhanagar (South of Banashankari)
+          ["Port F", 13.1689, 77.6277],  // Hoodi (North of Whitefield)
+          ["Port G", 12.9149, 77.5950],  // Konappana Agrahara (South of Electronic City)
+          ["Port H", 13.0804, 77.6371],  // Varthur (East of Marathahalli)
+          ["Port I", 13.0289, 77.4675],  // Kengeri (West of Mysore Road)
+          ["Port J", 13.1047, 77.6447],  // Hennur (North of KR Puram)
+          ["Port K", 13.0653, 77.5840],  // Domlur (East of Indiranagar)
+          ["Port L", 13.0298, 77.5313],  // Basavanagudi (South of Jayanagar)
+          ["Port M", 13.0727, 77.5777],  // Wilson Garden (South of Koramangala)
+          ["Port N", 13.0432, 77.5278],  // Madiwala (South of BTM)
+          ["Port O", 13.1332, 77.5499]   // Thanisandra (North of Yelahanka)
+        ];
+
+        debug('Adding charging ports...');
+        ports.forEach(([name, lat, lon], index) => {
+          const portMarker = L.circleMarker([lat, lon], { 
+            radius: 10,  // Increased size for better visibility
+            color: 'green',
+            fillColor: 'green',
+            fillOpacity: 0.9,
+            weight: 2
+          });
+          
+          portMarker.addTo(allMarkersLayer);
+          portMarker.bindPopup(`<b>${name}</b><br>Charging Port<br>Location: ${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+          debug(`Added charging port ${name} at [${lat}, ${lon}]`);
+        });
+        debug('All charging ports added');
+
+        // Restricted Zones
+        const zones = [
+          { name: "Airport Zone", sw: [13.197, 77.706], ne: [13.205, 77.718] },
+          { name: "Military Area", sw: [12.970, 77.590], ne: [12.975, 77.600] },
+          { name: "Vidhana Soudha Perimeter", sw: [12.979, 77.591], ne: [12.984, 77.596] },
+          { name: "Tech Park Zone", sw: [13.042, 77.615], ne: [13.048, 77.625] },
+          { name: "Railway Zone", sw: [12.960, 77.575], ne: [12.970, 77.585] }
+        ];
+        zones.forEach(({ name, sw, ne }) => {
+          L.rectangle([sw, ne], {
+            color: "red",
+            weight: 2,
+            fillOpacity: 0.3
+          }).addTo(map).bindPopup(`<b>${name}</b><br>Restricted Zone`);
+        });
+        debug('Restricted zones added');
+
+        // Drones
+        const drones = [
+          { id: "SRV_013", type: "Surveillance", lat: 13.0827, lon: 77.5877, state: "Patrolling", battery: 93.5, zone: "Central Bangalore" },  // MG Road area
+          { id: "SRV_011", type: "Surveillance", lat: 13.0232, lon: 77.5478, state: "Patrolling", battery: 73.0, zone: "South Bangalore" },  // JP Nagar
+          { id: "DRN_006", type: "Delivery", lat: 13.1132, lon: 77.5699, state: "In transit", battery: 46.4, zone: "North Bangalore" },      // Hebbal
+          { id: "DRN_002", type: "Delivery", lat: 12.9716, lon: 77.5946, state: "In transit", battery: 53.5, zone: "South-East Bangalore" }, // HSR Layout
+          { id: "DRN_010", type: "Delivery", lat: 13.0072, lon: 77.5513, state: "In transit", battery: 83.9, zone: "South-West Bangalore" }, // Banashankari
+          { id: "SRV_014", type: "Surveillance", lat: 13.1489, lon: 77.6177, state: "Patrolling", battery: 67.2, zone: "North-East Bangalore" }, // Whitefield
+          { id: "DRN_007", type: "Delivery", lat: 12.9349, lon: 77.6050, state: "In transit", battery: 78.5, zone: "South-East Bangalore" },    // Electronic City
+          { id: "SRV_015", type: "Surveillance", lat: 13.0604, lon: 77.6271, state: "Patrolling", battery: 82.1, zone: "East Bangalore" },      // Marathahalli
+          { id: "DRN_008", type: "Delivery", lat: 13.0089, lon: 77.4875, state: "In transit", battery: 45.8, zone: "West Bangalore" },          // Mysore Road
+          { id: "SRV_016", type: "Surveillance", lat: 13.0847, lon: 77.6347, state: "Patrolling", battery: 88.3, zone: "North-East Bangalore" }  // KR Puram
+        ];
         
-        debug(`Added drone ${drone.id} at [${drone.lat}, ${drone.lon}]`);
-      });
+        debug('Adding drones...');
+        drones.forEach(drone => {
+          const color = drone.type === "Surveillance" ? "purple" : "blue";
+          const marker = L.circleMarker([drone.lat, drone.lon], {
+            radius: 8,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.9,
+            weight: 2
+          }).addTo(allMarkersLayer);
+          
+          marker.bindPopup(`
+            <b>${drone.id}</b><br>
+            Type: ${drone.type}<br>
+            State: ${drone.state}<br>
+            Battery: ${drone.battery}%<br>
+            Zone: ${drone.zone}
+          `);
+          
+          debug(`Added drone ${drone.id} at [${drone.lat}, ${drone.lon}]`);
+        });
+        debug('All drones added');
 
-      // Fit map bounds to show all markers
-      const bounds = allMarkersLayer.getBounds();
-      map.fitBounds(bounds, { padding: [50, 50] });
-      debug('Map bounds adjusted to show all markers');
+        // Fit map bounds to show all markers
+        const bounds = allMarkersLayer.getBounds();
+        map.fitBounds(bounds, { padding: [50, 50] });
+        debug('Map bounds adjusted to show all markers');
 
-    } catch (error) {
-      debug('Error: ' + error.message);
-      console.error(error);
-    }
+        // Add a test marker to verify the map is working
+        const testMarker = L.marker([13.0827, 77.5877], {
+          title: 'Test Marker'
+        }).addTo(map);
+        debug('Test marker added at MG Road');
+
+      } catch (error) {
+        debug('Error: ' + error.message);
+        console.error(error);
+      }
+    };
   </script>
 </body>
 </html> 
