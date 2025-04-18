@@ -64,21 +64,21 @@
 
         // Charging Ports - Key locations in Bangalore (adjusted to avoid drone overlap)
         const ports = [
-          ["Port A", 13.0927, 77.5977],  // Ulsoor (North of MG Road)
-          ["Port B", 13.0332, 77.5378],  // Basavanagudi (South of JP Nagar)
-          ["Port C", 13.1232, 77.5599],  // Sahakar Nagar (North of Hebbal)
-          ["Port D", 12.9616, 77.5846],  // Bommanahalli (South of HSR)
-          ["Port E", 13.0272, 77.5313],  // Padmanabhanagar (South of Banashankari)
-          ["Port F", 13.1689, 77.6277],  // Hoodi (North of Whitefield)
-          ["Port G", 12.9149, 77.5950],  // Konappana Agrahara (South of Electronic City)
-          ["Port H", 13.0804, 77.6371],  // Varthur (East of Marathahalli)
-          ["Port I", 13.0289, 77.4675],  // Kengeri (West of Mysore Road)
-          ["Port J", 13.1047, 77.6447],  // Hennur (North of KR Puram)
-          ["Port K", 13.0653, 77.5840],  // Domlur (East of Indiranagar)
-          ["Port L", 13.0298, 77.5313],  // Basavanagudi (South of Jayanagar)
-          ["Port M", 13.0727, 77.5777],  // Wilson Garden (South of Koramangala)
-          ["Port N", 13.0432, 77.5278],  // Madiwala (South of BTM)
-          ["Port O", 13.1332, 77.5499]   // Thanisandra (North of Yelahanka)
+          ["Port A", 13.1027, 77.6077],  // Richards Town (North of Ulsoor)
+          ["Port B", 13.0532, 77.5178],  // Hanumanth Nagar (South of Basavanagudi)
+          ["Port C", 13.1432, 77.5399],  // RT Nagar (North of Sahakar Nagar)
+          ["Port D", 12.9416, 77.5746],  // Hongasandra (South of Bommanahalli)
+          ["Port E", 13.0472, 77.5113],  // Girinagar (South of Padmanabhanagar)
+          ["Port F", 13.1889, 77.6177],  // Kadugodi (North of Hoodi)
+          ["Port G", 12.8949, 77.5850],  // Singasandra (South of Konappana Agrahara)
+          ["Port H", 13.1004, 77.6471],  // Sarjapur (East of Varthur)
+          ["Port I", 13.0489, 77.4475],  // Rajarajeshwari Nagar (West of Kengeri)
+          ["Port J", 13.1247, 77.6547],  // Horamavu (North of Hennur)
+          ["Port K", 13.0853, 77.5740],  // Austin Town (East of Domlur)
+          ["Port L", 13.0498, 77.5113],  // Shanthi Nagar (South of Basavanagudi)
+          ["Port M", 13.0927, 77.5677],  // Richmond Town (South of Wilson Garden)
+          ["Port N", 13.0632, 77.5078],  // Wilson Garden (South of Madiwala)
+          ["Port O", 13.1532, 77.5299]   // Jakkur (North of Thanisandra)
         ];
 
         debug('Adding charging ports...');
@@ -116,16 +116,29 @@
 
         // Drones
         const drones = [
+          // Surveillance Drones
           { id: "SRV_013", type: "Surveillance", lat: 13.0827, lon: 77.5877, state: "Patrolling", battery: 93.5, zone: "Central Bangalore" },  // MG Road area
           { id: "SRV_011", type: "Surveillance", lat: 13.0232, lon: 77.5478, state: "Patrolling", battery: 73.0, zone: "South Bangalore" },  // JP Nagar
-          { id: "DRN_006", type: "Delivery", lat: 13.1132, lon: 77.5699, state: "In transit", battery: 46.4, zone: "North Bangalore" },      // Hebbal
-          { id: "DRN_002", type: "Delivery", lat: 12.9716, lon: 77.5946, state: "In transit", battery: 53.5, zone: "South-East Bangalore" }, // HSR Layout
-          { id: "DRN_010", type: "Delivery", lat: 13.0072, lon: 77.5513, state: "In transit", battery: 83.9, zone: "South-West Bangalore" }, // Banashankari
           { id: "SRV_014", type: "Surveillance", lat: 13.1489, lon: 77.6177, state: "Patrolling", battery: 67.2, zone: "North-East Bangalore" }, // Whitefield
-          { id: "DRN_007", type: "Delivery", lat: 12.9349, lon: 77.6050, state: "In transit", battery: 78.5, zone: "South-East Bangalore" },    // Electronic City
           { id: "SRV_015", type: "Surveillance", lat: 13.0604, lon: 77.6271, state: "Patrolling", battery: 82.1, zone: "East Bangalore" },      // Marathahalli
-          { id: "DRN_008", type: "Delivery", lat: 13.0089, lon: 77.4875, state: "In transit", battery: 45.8, zone: "West Bangalore" },          // Mysore Road
-          { id: "SRV_016", type: "Surveillance", lat: 13.0847, lon: 77.6347, state: "Patrolling", battery: 88.3, zone: "North-East Bangalore" }  // KR Puram
+          { id: "SRV_016", type: "Surveillance", lat: 13.0847, lon: 77.6347, state: "Patrolling", battery: 88.3, zone: "North-East Bangalore" }, // KR Puram
+
+          // Delivery Drones
+          { id: "DRN_001", type: "Delivery", lat: 13.0927, lon: 77.5977, state: "In transit", battery: 85.4, zone: "Central Bangalore" },      // Ulsoor
+          { id: "DRN_002", type: "Delivery", lat: 12.9716, lon: 77.5946, state: "In transit", battery: 53.5, zone: "South-East Bangalore" }, // HSR Layout
+          { id: "DRN_003", type: "Delivery", lat: 13.0332, lon: 77.5378, state: "In transit", battery: 78.2, zone: "South Bangalore" },      // Basavanagudi
+          { id: "DRN_004", type: "Delivery", lat: 13.1232, lon: 77.5599, state: "In transit", battery: 62.8, zone: "North Bangalore" },     // Sahakar Nagar
+          { id: "DRN_005", type: "Delivery", lat: 12.9616, lon: 77.5846, state: "In transit", battery: 45.6, zone: "South Bangalore" },     // Bommanahalli
+          { id: "DRN_006", type: "Delivery", lat: 13.1132, lon: 77.5699, state: "In transit", battery: 46.4, zone: "North Bangalore" },     // Hebbal
+          { id: "DRN_007", type: "Delivery", lat: 12.9349, lon: 77.6050, state: "In transit", battery: 78.5, zone: "South-East Bangalore" }, // Electronic City
+          { id: "DRN_008", type: "Delivery", lat: 13.0089, lon: 77.4875, state: "In transit", battery: 45.8, zone: "West Bangalore" },      // Mysore Road
+          { id: "DRN_009", type: "Delivery", lat: 13.0272, lon: 77.5313, state: "In transit", battery: 91.2, zone: "South Bangalore" },      // Padmanabhanagar
+          { id: "DRN_010", type: "Delivery", lat: 13.0072, lon: 77.5513, state: "In transit", battery: 83.9, zone: "South-West Bangalore" }, // Banashankari
+          { id: "DRN_011", type: "Delivery", lat: 13.1689, lon: 77.6277, state: "In transit", battery: 72.3, zone: "North-East Bangalore" }, // Hoodi
+          { id: "DRN_012", type: "Delivery", lat: 12.9149, lon: 77.5950, state: "In transit", battery: 68.7, zone: "South Bangalore" },      // Konappana Agrahara
+          { id: "DRN_013", type: "Delivery", lat: 13.0804, lon: 77.6371, state: "In transit", battery: 55.4, zone: "East Bangalore" },      // Varthur
+          { id: "DRN_014", type: "Delivery", lat: 13.0289, lon: 77.4675, state: "In transit", battery: 49.8, zone: "West Bangalore" },      // Kengeri
+          { id: "DRN_015", type: "Delivery", lat: 13.1047, lon: 77.6447, state: "In transit", battery: 77.6, zone: "North Bangalore" }       // Hennur
         ];
         
         debug('Adding drones...');
@@ -169,4 +182,4 @@
     };
   </script>
 </body>
-</html> 
+</html>
